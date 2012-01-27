@@ -1,6 +1,7 @@
 (ns leiningen.repljs
   (:use
-    [leiningen.compile :only (eval-in-project)]))
+    [leiningen.compile :only (eval-in-project)]
+    [leiningen.trampoline :only (*trampoline?*)]))
 
 (defn start-browser-repl [project browser out-dir out-file port]
   (eval-in-project
@@ -8,11 +9,12 @@
   `(let [start-repl#
          (fn []
            (cljs.repl/repl
-             (cljs.repl.browser/repl-env :port (Integer/parseInt ~port))))
+             (cljs.repl.browser/repl-env :port (Integer/parseInt ~port)
+                                         :working-dir ~out-dir)))
 
          create-html-file#
          (fn []
-           (let [tmp-html# (java.io.File. "repl.html")]
+           (let [tmp-html# (java.io.File. "repljs.html")]
              (spit
                tmp-html#
                (str "<html><head><meta charset='UTF-8'></head>"
@@ -24,7 +26,7 @@
 
          create-phantomjs-script#
          (fn [tmp-html#]
-           (let [tmp-js# (java.io.File. (str ~out-dir "/phantom.js"))]
+           (let [tmp-js# (java.io.File. (str ~out-dir "/repljs-phantom.js"))]
              (spit
                tmp-js#
                (str "new WebPage().open('"
@@ -71,11 +73,31 @@
     nil nil
     '(require 'cljs.repl 'cljs.repl.rhino)))
 
-(defn repljs
+(defn repljs*
   ([project]
    (start-rhino-repl project))
   ([project browser & [port & args]]
    (let [out-dir (.getAbsolutePath (java.io.File. (:cljs-output-dir project)))
-         out-file (.getAbsolutePath (java.io.File. (str out-dir "/repl.js")))
+         out-file (.getAbsolutePath (java.io.File. (str out-dir "/repljs.js")))
          port (or port "9000")]
      (start-browser-repl project browser out-dir out-file port))))
+
+(defn repljs
+  "Run a clojurescript repl with rhino or in the browser.
+
+lein trampoline repljs                 => rhino repl
+lein trampoline repljs browser [port]  => browser repl
+
+The browser repl creates repljs.html in the project
+directory, and client.js and repljs.js in the directory
+named by the :cljs-output-dir property. If the browser
+command is 'phantom' or 'phantomjs' an additional file
+repljs-phantom.js is created in the same directory."
+  [project & args]
+  (if *trampoline?*
+    (apply repljs* project args)
+    (do
+      (println
+        (str "The repljs plugin must be run by the trampoline:\n"
+             "(lein trampoline repljs). This should be fixed in leiningen 2."))
+      1)))
