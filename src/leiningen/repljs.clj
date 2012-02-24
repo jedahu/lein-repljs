@@ -17,7 +17,8 @@
            (let [tmp-html# (java.io.File. "repljs.html")]
              (spit
                tmp-html#
-               (str "<html><head><meta charset='UTF-8'></head>"
+               (str "<?xml version='1.0' encoding='UTF-8'?>"
+                    "<html><head><meta charset='UTF-8'/></head>"
                     "<body><script src='" ~out-dir "/goog/base.js'></script>"
                     "<script src='" ~out-file "'></script>"
                     "<script>goog.require('leiningen.repljs.browser');</script></body></html>"
@@ -77,7 +78,7 @@
   ([project]
    (start-rhino-repl project))
   ([project browser & [port & args]]
-   (let [out-dir (.getAbsolutePath (java.io.File. (:cljs-output-dir project)))
+   (let [out-dir (.getAbsolutePath (java.io.File. (:output-dir (:cljs project))))
          out-file (.getAbsolutePath (java.io.File. (str out-dir "/repljs.js")))
          port (or port "9000")]
      (start-browser-repl project browser out-dir out-file port))))
@@ -88,11 +89,10 @@
 lein trampoline repljs                 => rhino repl
 lein trampoline repljs browser [port]  => browser repl
 
-The browser repl creates repljs.html in the project
-directory, and client.js and repljs.js in the directory
-named by the :cljs-output-dir property. If the browser
-command is 'phantom' or 'phantomjs' an additional file
-repljs-phantom.js is created in the same directory."
+The browser repl creates repljs.html in the project directory, and client.js
+and repljs.js in the directory named by the :output-dir key of the :cljs
+property. If the browser command is 'phantom' or 'phantomjs' an additional
+file repljs-phantom.js is created in the same directory."
   [project & args]
   (if *trampoline?*
     (apply repljs* project args)
