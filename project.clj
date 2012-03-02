@@ -1,5 +1,5 @@
 (defproject
-  lein-repljs "0.1.2-SNAPSHOT"
+  lein-repljs "0.1.2"
 
   :description
   "clojurescript rhino and browser repl for leiningen"
