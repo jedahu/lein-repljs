@@ -25,16 +25,6 @@
                     ))
              tmp-html#))
 
-         create-phantomjs-script#
-         (fn [tmp-html#]
-           (let [tmp-js# (java.io.File. (str ~out-dir "/repljs-phantom.js"))]
-             (spit
-               tmp-js#
-               (str "new WebPage().open('"
-                    (.getAbsolutePath tmp-html#)
-                    "', function() {});"))
-             tmp-js#))
-
          build-browser-js#
          (fn []
            (cljs.closure/build
@@ -51,11 +41,7 @@
            (.exec
              (Runtime/getRuntime)
              (into-array
-               [~browser
-                (.getAbsolutePath
-                  (if (some #{"phantom" "phantomjs"} #{~browser})
-                    (create-phantomjs-script# tmp-html#)
-                    tmp-html#))])))
+               [~browser (.getAbsolutePath tmp-html#)])))
          ]
      (build-browser-js#)
      (future
@@ -91,8 +77,7 @@ lein trampoline repljs browser [port]  => browser repl
 
 The browser repl creates repljs.html in the project directory, and client.js
 and repljs.js in the directory named by the :output-dir key of the :cljs
-property. If the browser command is 'phantom' or 'phantomjs' an additional
-file repljs-phantom.js is created in the same directory."
+property."
   [project & args]
   (if *trampoline?*
     (apply repljs* project args)
