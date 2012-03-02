@@ -6,10 +6,6 @@
 
   :dependencies
   [[org.clojure/clojure "1.3.0"]
-   [org.clojure/clojurescript "0.0-927"]]
-
-  :repositories
-  {"sonatype-oss"
-   "http://oss.sonatype.org/content/groups/public/"}
+   [org.clojure/clojurescript "0.0-971"]]
 
   :eval-in-leiningen true)
