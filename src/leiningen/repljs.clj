@@ -64,7 +64,7 @@
   ([project]
    (start-rhino-repl project))
   ([project browser & [port & args]]
-   (let [out-dir (.getAbsolutePath (java.io.File. (:output-dir (:cljs project))))
+   (let [out-dir (.getAbsolutePath (java.io.File. (get-in project [:cljs :output-dir] "public")))
          out-file (.getAbsolutePath (java.io.File. (str out-dir "/repljs.js")))
          port (or port "9000")]
      (start-browser-repl project browser out-dir out-file port))))
